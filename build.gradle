@@ -1,0 +1,132 @@
+apply plugin: 'java'
+
+// Use Maven Central for dependency repository.
+repositories {
+    mavenCentral()
+}
+
+// Define the source sets for each type of build (Android, Java, Android Dev, etc...)
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+
+    // For our Android Library
+    android {
+        java {
+            srcDir 'src/com/sensorcon/sensordrone'
+            exclude '**/java/**'
+            exclude '**/dev/**'
+        }
+    }
+
+    // For our Android Dev. Library
+    androiddev {
+        java {
+            srcDir 'src/com/sensorcon/sensordrone'
+            exclude '**/java/**'
+        }
+    }
+
+    // For our Java Library
+    java {
+        java {
+            srcDir 'src/com/sensorcon/sensordrone'
+            exclude '**/android/**'
+            exclude '**/dev/**'
+        }
+    }
+
+    // For our Java Dev. Library
+    javadev {
+        java {
+            srcDir 'src/com/sensorcon/sensordrone'
+            exclude '**/android/**'
+        }
+    }
+
+}
+
+
+dependencies {
+    // Example of how to use jar files in a "libs" folder
+//    compile fileTree(dir: 'libs', include: '*.jar')
+//    androidCompile fileTree(dir: 'libs', include: '*.jar')
+
+
+    compile 'com.google.android:android:2.3.3'
+    compile 'net.sf.bluecove:bluecove:2.1.0'
+
+    // We build against Gingerbread
+    androidCompile 'com.google.android:android:2.3.3'
+    androiddevCompile 'com.google.android:android:2.3.3'
+
+    // Our Java library uses BlueCove for bluetooth.
+    javaCompile 'net.sf.bluecove:bluecove:2.1.0'
+    javadevCompile 'net.sf.bluecove:bluecove:2.1.0'
+
+
+}
+
+// We need to build 2 APIs
+
+task androidAPI(type: Javadoc) {
+
+    // App developers will use the Drone class, so don't
+    // bother with JavaDoc for "low level" objects they wont be using.
+    source = [
+            'src/com/sensorcon/sensordrone/android',
+            'src/com/sensorcon/sensordrone/CoreDrone.java',
+            'src/com/sensorcon/sensordrone/DroneEventObject.java',
+            'src/com/sensorcon/sensordrone/DroneEventListener.java',
+            'src/com/sensorcon/sensordrone/DroneEventHandler.java',
+            'src/com/sensorcon/sensordrone/DroneStatusListener.java'
+    ]
+
+    destinationDir = new File("build/API/android")
+    options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PUBLIC
+}
+
+task javaAPI(type: Javadoc) {
+
+    // Program developers will use the Drone class, so don't
+    // bother with JavaDoc for "low level" objects they wont be using.
+    source = [
+            'src/com/sensorcon/sensordrone/java',
+            'src/com/sensorcon/sensordrone/CoreDrone.java',
+            'src/com/sensorcon/sensordrone/DroneEventObject.java',
+            'src/com/sensorcon/sensordrone/DroneEventListener.java',
+            'src/com/sensorcon/sensordrone/DroneEventHandler.java',
+            'src/com/sensorcon/sensordrone/DroneStatusListener.java'
+    ]
+    destinationDir = new File("build/API/java")
+    options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PUBLIC
+}
+
+// Jar Naming: ${baseName}-${appendix}-${version}-${classifier}.${extension}
+
+// Current version
+version = "1.2.0"
+classifier = ""
+
+task buildSDAndroidLib(type: Jar, dependsOn: classes) {
+
+    baseName = "SDAndroidLib"
+    // Don't attach source code
+//    from sourceSets.android.output
+    // Attach source code
+    from sourceSets.android.allSource
+
+}
+
+task buildSDJavaLib(type: Jar, dependsOn: classes) {
+
+    baseName = "SDJavaLib"
+
+    from sourceSets.java.output
+
+}
+
+

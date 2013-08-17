@@ -1,0 +1,24 @@
+#########
+# 1.2.0 #
+#########
+
+Moved packages around to extend into an Android version and a Java version for quicker developing, and to keep the two
+libraries as close as possible.
+
+Fixed a bug in temperature_Kelvin: It was previously calculated from temperature_Celsius - 273.15. It is now correctly
+calculated as temperature_Celsius + 273.15. If you use a previous version of the library, you will need to add 2*273.15
+to temperature_Kelvin to get the correct value.
+
+Added uartInputStream. Anything read from the external uart will also get dumped into this input stream for easier
+processing of data. (Similar for USB).
+
+Fixed a bug in parsing batteryVoltage.
+
+Fixed a bug in checking the oxidizing status (fired the reducing status event)
+
+
+#########
+# 1.1.1 #
+#########
+
+Initial release

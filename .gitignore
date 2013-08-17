@@ -1,0 +1,11 @@
+.DS_Store
+.classpath
+.externalToolBuilders
+.project
+.settings
+API/**
+bin/**
+.idea
+build
+.gradle
+Sensordrone.iml
