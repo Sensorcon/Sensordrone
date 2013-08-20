@@ -1754,7 +1754,7 @@ public abstract class CoreDrone {
      * @deprecated Please use registerDroneListener
      */
     public void registerDroneEventListener(DroneEventListener listener) {
-        droneEventListenerList.add(DroneEventListener.class, listener);
+        droneListenerList.add(DroneEventListener.class, listener);
     }
 
     /**
@@ -1765,7 +1765,7 @@ public abstract class CoreDrone {
      * @deprecated please use unregisterDroneListener
      */
     public void unregisterDroneEventListener(DroneEventListener listener) {
-        droneEventListenerList.remove(DroneEventListener.class, listener);
+        droneListenerList.remove(DroneEventListener.class, listener);
     }
 
     /**
@@ -1776,7 +1776,7 @@ public abstract class CoreDrone {
      * @deprecated Please use registerDroneListener
      */
     public void registerDroneStatusListener(DroneStatusListener listener) {
-        droneStatusListenerList.add(DroneStatusListener.class, listener);
+        droneListenerList.add(DroneStatusListener.class, listener);
     }
 
     /**
@@ -1787,7 +1787,7 @@ public abstract class CoreDrone {
      * @deprecated Please use unregisterDroneListener
      */
     public void unregisterDroneStatusListener(DroneStatusListener listener) {
-        droneStatusListenerList.remove(DroneStatusListener.class, listener);
+        droneListenerList.remove(DroneStatusListener.class, listener);
     }
 
     /**

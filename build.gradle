@@ -109,13 +109,13 @@ task javaAPI(type: Javadoc) {
 
 // Current version
 version = "1.2.0"
-classifier = ""
+classifier = "SNAPSHOT"
 
 task buildSDAndroidLib(type: Jar, dependsOn: classes) {
 
     baseName = "SDAndroidLib"
     // Don't attach source code
-//    from sourceSets.android.output
+    from sourceSets.android.output
     // Attach source code
     from sourceSets.android.allSource
 

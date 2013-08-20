@@ -1,3 +1,18 @@
+##################
+# 1.2.0-SNAPSHOT #
+##################
+
+
+Fixed bug for
+* registerDroneEventListener
+* unregisterDroneEventListener
+* unregisterDroneStatusListener
+* unregisterDroneStatusListener
+The listeners were not being added to the appropriate ListenerList, and therefore events were not firing.
+
+
+Added SNAPSHOT tag for gradle build script.
+
 #########
 # 1.2.0 #
 #########
