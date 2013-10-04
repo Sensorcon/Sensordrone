@@ -34,10 +34,12 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.TextView;
 import com.sensorcon.sensordrone.android.Drone;
 
 /**
@@ -53,6 +55,8 @@ public class DroneConnectionHelper {
     private IntentFilter btFilter;
     private Dialog scanDialog; // The Dialog we will display results in
     private AlertDialog.Builder dBuilder; // A builder for the Dialog
+
+    ListView macList;
 
     /**
      * scantoConnect will launch an alert dialog, which will scan for Bluetooth devices,
@@ -254,10 +258,11 @@ public class DroneConnectionHelper {
         builder.setTitle("Paired Bluetooth Devices");
 
         // Set up our ListView to hold the items
-        ListView macList = new ListView(context);
+        macList = new ListView(context);
+        macList.setBackgroundColor(Color.WHITE);
 
         // Set up our ArrayAdapter
-        final ArrayAdapter<String> macAdapter = new ArrayAdapter<String>(
+        final ArrayAdapter<String> macAdapter = new MacArrayAdapter(
                 context,
                 android.R.layout.simple_list_item_1);
         macList.setAdapter(macAdapter);
@@ -265,8 +270,8 @@ public class DroneConnectionHelper {
         // Get the list of paired devices
         Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
         // Add paired devices to the list
+        int nDrones = 0;
         if (pairedDevices.size() > 0) {
-            int nDrones = 0;
             for (BluetoothDevice device : pairedDevices) {
                 // We only want Sensordrones
                 if (device.getName().contains("drone")) {
@@ -275,15 +280,16 @@ public class DroneConnectionHelper {
                     macAdapter.add(device.getName() + "\n" + device.getAddress());
                 }
             }
-            if (nDrones == 0) {
-                String msg ="There are no paired Sensordrones on your device.\n\n";
-                msg += "Please pair a Sensordrone with you Android Device.\n\n";
-                msg += "On most devices, this can be done via\n\n";
-                msg += "Settings >> Bluetooth >> Search for Devices\n\n";
-                msg += "The pairing code for a Sensordrone is 0000 (for zeroes)";
-                genericDialog(context,"No Paired Devices", msg);
-                return;
-            }
+
+        }
+        if (nDrones == 0) {
+            String msg ="There are no paired Sensordrones on your device.\n\n";
+            msg += "Please pair a Sensordrone with you Android Device.\n\n";
+            msg += "On most devices, this can be done via\n\n";
+            msg += "Settings >> Bluetooth >> Search for Devices\n\n";
+            msg += "The pairing code for a Sensordrone is 0000 (for zeroes)";
+            genericDialog(context,"No Paired Devices", msg);
+            return;
         }
 
         builder.setView(macList);
@@ -299,6 +305,9 @@ public class DroneConnectionHelper {
                                     int arg2, long arg3) {
 
                 // Once an item is selected...
+
+                // Don't let people click it twice
+                macList.setClickable(false);
 
                 // Get the MAC address
                 String deviceToConenct = macAdapter.getItem(arg2);
@@ -348,6 +357,25 @@ public class DroneConnectionHelper {
         });
         dialog = builder.create();
         dialog.show();
+    }
+
+    // This is just so we can (consistently) set the text color in our list of MACs
+    private class MacArrayAdapter extends ArrayAdapter<String> {
+
+        public MacArrayAdapter(Context context, int resource, String[] objects) {
+            super(context, resource, objects);
+        }
+
+        private MacArrayAdapter(Context context, int resource) {
+            super(context, resource);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            TextView view = (TextView) super.getView(position, convertView, parent);
+            view.setTextColor(Color.BLACK);
+            return view;
+        }
     }
 
 }
