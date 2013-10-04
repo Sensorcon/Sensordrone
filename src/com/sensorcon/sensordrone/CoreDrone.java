@@ -1343,7 +1343,26 @@ public abstract class CoreDrone {
         }
         return false;
     }
-	
+
+    /**
+     * A method to write a byte[], and follow it immediately (after the designated delay) with a read
+     * (blocks executing thread!).
+     *
+     * This is useful for working with (Serial) modules, where you send it a command
+     * and expect a response based on that command, instead of parsing a Serial response asynchronously.
+     *
+     * @param data The byte[] to write
+     * @param  msDelay after the write byte[] is sent, wait this long before reading and returning a response
+     * @since 1.1.2-SNAPSHOT
+     *
+     */
+    public byte[] uartWriteForRead(byte[] data, int msDelay) {
+        if (hardwareVersion == 1) {
+            return ((UART_V1) UART_CONTROLLER).writeForRead(data, msDelay);
+        }
+        return new byte[] {0x00};
+    }
+
 	/*
 	 * USBUart
 	 */

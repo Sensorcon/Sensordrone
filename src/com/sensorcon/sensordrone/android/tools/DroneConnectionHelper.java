@@ -87,10 +87,12 @@ public class DroneConnectionHelper {
 
         // Set up our ListView to hold the items
         ListView macList = new ListView(context);
-        // Set the overlay to transparent (can sometimes obscure text)
-        macList.setCacheColorHint(Color.TRANSPARENT);
-        // The text will be black, so we need to change the BG color
-        macList.setBackgroundColor(Color.WHITE);
+        // This seems to have been a Android bug that has since been fixed.
+        // Keep an eye on it though...
+//        // Set the overlay to transparent (can sometimes obscure text)
+//        macList.setCacheColorHint(Color.TRANSPARENT);
+//        // The text will be black, so we need to change the BG color
+//        macList.setBackgroundColor(Color.WHITE);
 
         // Set up our ArrayAdapter
         final ArrayAdapter<String> macAdapter = new ArrayAdapter<String>(
@@ -233,6 +235,89 @@ public class DroneConnectionHelper {
 
     }
 
+    public void connectFromPairedDevices(final Drone drone, final Context context) {
+
+        // Set up our Bluetooth Adapter
+        btAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        // Is Bluetooth on?
+        boolean isOn = btAdapter.isEnabled();
+
+        if (!isOn) {
+            // Don't proceed until the user turns Bluetooth on.
+            genericDialog(context,"Bluetooth is Off", "Please enable Bluetooth before proceeding");
+            return;
+        }
+
+        Dialog dialog = new Dialog(context);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Paired Bluetooth Devices");
+
+        // Set up our ListView to hold the items
+        ListView macList = new ListView(context);
+
+        // Set up our ArrayAdapter
+        final ArrayAdapter<String> macAdapter = new ArrayAdapter<String>(
+                context,
+                android.R.layout.simple_list_item_1);
+        macList.setAdapter(macAdapter);
+
+        // Get the list of paired devices
+        Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
+        // Add paired devices to the list
+        if (pairedDevices.size() > 0) {
+            int nDrones = 0;
+            for (BluetoothDevice device : pairedDevices) {
+                // We only want Sensordrones
+                if (device.getName().contains("drone")) {
+                    nDrones++;
+                    // Add the Name and MAC
+                    macAdapter.add(device.getName() + "\n" + device.getAddress());
+                }
+            }
+            if (nDrones == 0) {
+                String msg ="There are no paired Sensordrones on your device.\n\n";
+                msg += "Please pair a Sensordrone with you Android Device.\n\n";
+                msg += "On most devices, this can be done via\n\n";
+                msg += "Settings >> Bluetooth >> Search for Devices\n\n";
+                msg += "The pairing code for a Sensordrone is 0000 (for zeroes)";
+                genericDialog(context,"No Paired Devices", msg);
+                return;
+            }
+        }
+
+        builder.setView(macList);
+        dialog = builder.create();
+        dialog.show();
+
+        // Handle the Bluetooth device selection
+        final Dialog finalDialog = dialog;
+        macList.setOnItemClickListener(new OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View arg1,
+                                    int arg2, long arg3) {
+
+                // Once an item is selected...
+
+                // Get the MAC address
+                String deviceToConenct = macAdapter.getItem(arg2);
+                int MACLength = deviceToConenct.length();
+                deviceToConenct = deviceToConenct.substring(MACLength - 17, MACLength);
+
+                // Try to connect
+                if (!drone.btConnect(deviceToConenct)) {
+                    genericDialog(context, "Connection Failed!","Connection was not successful.\n\nPlease try again!");
+                }
+
+                // Dismiss the dialog
+                finalDialog.dismiss();
+
+            }
+        });
+
+    }
+
     /**
      * Check if Bluetooth is currently enabled and, if not, asks the user to enable it.
      *
@@ -248,6 +333,21 @@ public class DroneConnectionHelper {
         } else {
             return true;
         }
+    }
+
+    private void genericDialog(Context context, String title, String msg) {
+        Dialog dialog;
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(title);
+        builder.setMessage(msg);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //
+            }
+        });
+        dialog = builder.create();
+        dialog.show();
     }
 
 }

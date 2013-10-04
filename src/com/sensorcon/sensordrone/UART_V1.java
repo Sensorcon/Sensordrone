@@ -19,6 +19,9 @@ import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.ByteBuffer;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 
 /**
@@ -295,6 +298,111 @@ public class UART_V1 extends DroneSensor {
     }
 
     /**
+     * A method to write a byte[], and follow it immediately (after the designated delay) with a read
+     * (blocks executing thread!).
+     *
+     * This is useful for working with (Serial) modules, where you send it a command
+     * and expect a response based on that command, instead of parsing a Serial response asynchronously.
+     *
+     * @param write The byte[] to write
+     * @param  msDelay after the write byte[] is sent, wait this long before reading and returning a response
+     *
+     * @return
+     */
+    public byte[] writeForRead(byte[] write, int msDelay) {
+        // Some return values so we don't have to give back a null
+        byte[] notConnected = {0x00};
+        byte[] writeTooLong = {0x01};
+        byte[] badWrite = {0x02};
+        byte[] badRead = {0x03};
+        byte[] badBlock = {0x04};
+
+
+
+
+        // Make sure we're connected
+        if (!myDrone.isConnected) {
+            return notConnected;
+        }
+        // Make sure we don't write too much
+        if (write.length > UART_BUFFER_LENGTH) {
+            return writeTooLong;
+        }
+
+        // Set up the packet
+        int dataLength = write.length;
+        final ByteBuffer callBuffer = ByteBuffer.allocate(dataLength + 4);
+        byte[] first3 = {0x50, (byte) ((dataLength + 2) & 0x000000ff), 0x24};
+        byte[] zero = {0x00};
+        callBuffer.put(first3);
+        callBuffer.put(write);
+        callBuffer.put(zero);
+
+        // All communication should be done through the executor service!
+        Callable<byte[]> writeCall = new Callable<byte[]>() {
+            @Override
+            public byte[] call() throws Exception {
+                byte[] response = sdCallAndResponse(callBuffer.array());
+                return response;
+            }
+        };
+        Future<byte[]> bgWriteCall = myDrone.commService.submit(writeCall);
+        byte[] writeResponse;
+        try {
+            writeResponse = bgWriteCall.get();
+        } catch (InterruptedException e) {
+            return badBlock;
+        } catch (ExecutionException e) {
+            return badBlock;
+        }
+
+        // Make sure we got something back
+        if (writeResponse == null) {
+            return badWrite;
+        }
+
+
+        // Wait for any delay
+        if (msDelay <= 0) {
+            //
+        }
+        else {
+            try {
+                Thread.sleep(msDelay);
+            } catch (InterruptedException e) {
+                //
+            }
+        }
+
+        // Now we want to to read the response
+        Callable<byte[]> readCall = new Callable<byte[]>() {
+            @Override
+            public byte[] call() throws Exception {
+                byte[] read = {0x50, 0x02, 0x25, 0x00};
+                byte[] response = sdCallAndResponse(read);
+                return response;
+            }
+        };
+        Future<byte[]> bgReadCall = myDrone.commService.submit(readCall);
+        byte[] readResponse;
+        try {
+            readResponse = bgReadCall.get();
+        } catch (InterruptedException e) {
+            return badBlock;
+        } catch (ExecutionException e) {
+            return badBlock;
+        }
+
+
+        if (readResponse == null) {
+            return badRead;
+        } else {
+            return readResponse;
+        }
+    }
+
+
+    /**
      * Our default constructor
      * @param drone
      */
@@ -309,6 +417,7 @@ public class UART_V1 extends DroneSensor {
             logger.infoLogger(TAG, "Failed to connect stream", CoreDrone.DEBUG);
         }
     }
+
 
 
 }

@@ -4,12 +4,23 @@
 
 
 Fixed bug for
-* registerDroneEventListener
-* unregisterDroneEventListener
-* unregisterDroneStatusListener
-* unregisterDroneStatusListener
+*   registerDroneEventListener
+*   unregisterDroneEventListener
+*   unregisterDroneStatusListener
+*   unregisterDroneStatusListener
 The listeners were not being added to the appropriate ListenerList, and therefore events were not firing.
 
+*   Added a check for the stop() method of DroneStreamer. If a user called stop() before start(), it would
+    throw a NullPointerException
+
+*   Added connectFromPairedDevices() to DroneConnectionStreamer, which displays only a list of Sensordrones
+    paired with the phone via the phones Bluetooth settings.
+
+*   Changed the text display color of scanToConnect() in DroneConnectionStreamer. Need to make sure this behaves.
+
+*   Added a uartWriteForRead method to CoreDrone, to be able to perform a serial write, followed by a serial read.
+    Useful for working with modules that give responses based on commands, and you don't want to parse all that
+    asynchronously
 
 Added SNAPSHOT tag for gradle build script.
 

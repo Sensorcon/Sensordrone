@@ -73,7 +73,10 @@ public abstract class DroneStreamer implements Runnable {
     public void stop() {
         this.OnOff = false;
         this.isRunning = false;
-        streamService.shutdown();
+        // If we call stop before start, this could be null
+        if (streamService != null) {
+            streamService.shutdown();
+        }
     }
 
     @Override

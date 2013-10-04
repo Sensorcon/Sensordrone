@@ -114,6 +114,7 @@ classifier = "SNAPSHOT"
 task buildSDAndroidLib(type: Jar, dependsOn: classes) {
 
     baseName = "SDAndroidLib"
+    classifier = "SNAPSHOT"
     // Don't attach source code
     from sourceSets.android.output
     // Attach source code
