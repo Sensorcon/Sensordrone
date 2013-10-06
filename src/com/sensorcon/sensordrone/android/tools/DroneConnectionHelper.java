@@ -284,7 +284,7 @@ public class DroneConnectionHelper {
         }
         if (nDrones == 0) {
             String msg ="There are no paired Sensordrones on your device.\n\n";
-            msg += "Please pair a Sensordrone with you Android Device.\n\n";
+            msg += "Please pair a Sensordrone with your Android Device.\n\n";
             msg += "On most devices, this can be done via\n\n";
             msg += "Settings >> Bluetooth >> Search for Devices\n\n";
             msg += "The pairing code for a Sensordrone is 0000 (for zeroes)";
