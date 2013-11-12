@@ -48,7 +48,11 @@ public class UART_V1 extends DroneSensor {
      * Used to set the buffer size of usbUartInputStream.
      * Currently big enough to hold 2 reads a second for 60 seconds.
      */
-    private int UART_STREAM_BUFFER_SIZE = UART_BUFFER_LENGTH * 2 * 60;
+    //private int UART_STREAM_BUFFER_SIZE = UART_BUFFER_LENGTH * 2 * 60;
+    // Note: Passing a buffer size to the Constructor is only supported in Android 9 and later.
+    // To keep compatibility, this will need to be set to the default of 1024.
+    // Later, we will make it choose based on OS version, for now, make it simple.
+    private int UART_STREAM_BUFFER_SIZE = 1024;
 
     /**
      * Used to set the baud to 2400
@@ -409,8 +413,9 @@ public class UART_V1 extends DroneSensor {
     public UART_V1(CoreDrone drone) {
         super(drone, "UART_V1");
 
-
-        uartInputStream = new PipedInputStream(UART_STREAM_BUFFER_SIZE);
+          // Sett comment above about UART_STREAM_BUFFER_SIZE
+//        uartInputStream = new PipedInputStream(UART_STREAM_BUFFER_SIZE);
+        uartInputStream = new PipedInputStream();
         try {
             uartInputDummy = new PipedOutputStream(uartInputStream);
         } catch (IOException e) {
