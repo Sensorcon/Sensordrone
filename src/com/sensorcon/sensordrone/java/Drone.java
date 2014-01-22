@@ -39,8 +39,8 @@ public class Drone extends CoreDrone {
      * Bluetooth communication related items
      */
     protected StreamConnection btSocket;
-    protected InputStream iStream;
-    protected OutputStream oStream;
+    //protected InputStream iStream;
+    //protected OutputStream oStream;
 
 
     /**
@@ -70,6 +70,7 @@ public class Drone extends CoreDrone {
 
             // Store the MAC address
             lastMAC = MAC;
+            commService = Executors.newSingleThreadExecutor();
 
             // Get Hardware / Firmware #
             byte[] readHWFW = {0x50, 0x02, 0x33, 0x00};
